@@ -1,0 +1,2 @@
+# blog
+Flask mega tutorial

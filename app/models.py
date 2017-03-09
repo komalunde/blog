@@ -1,4 +1,3 @@
-
 from hashlib import md5
 from app import db
 
@@ -67,6 +66,4 @@ class Post(db.Model):
 
     def __init__(self,post):
         self.post= post
-
-    def __repr__(self):
         return '<Post %r>' % (self.body)

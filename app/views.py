@@ -26,7 +26,7 @@ def index():
     return render_template('index.html', title="Home", user=user, posts=posts)
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login',methods=['GET','POST'])
 def login():
     if g.user is not None and g.user.is_authenticated:
         return redirect(url_for('index'))
@@ -45,18 +45,18 @@ def login():
     return render_template('login.html', form=form)
 
 
-@app.route('/user/<nickname>', methods=['GET'])
+@app.route('/user/<nickname>')
 @login_required
 def user(nickname):
     user = User.query.filter_by(nickname=nickname).first()
-    if user is None:
+    if user == None:
         flash('User %s not found.'% nickname)
         return redirect(url_for('index'))
     posts = [
         {'author': user,'body': 'Test post #1'},
         {'author': user,'body': 'Test post #2'}
     ]
-    return render_template('user.html', user=user, posts=posts)
+    return render_template('user.html',user=user,posts=posts)
 
 
 @lm.user_loader
@@ -72,8 +72,14 @@ def before_request():
         db.session.add(g.user)
         db.session.commit()
 
+
 @app.route('/after_login')
 @login_required
+@app.before_request
+def before_request():
+    g.user = current_user
+
+
 def after_login(resp):
     if resp.email is None or resp.email == "":
         flash('Invalid login. Please try again.')
@@ -82,7 +88,7 @@ def after_login(resp):
     if user is None:
         nickname = resp.nickname
         if nickname is None or nickname == "":
-            nickname = resp.email.split('@')[0]
+            # nickname = resp.email.split('@')[0]
             nickname = User.make_unique_nickname(nickname)
         user = User(nickname=nickname, email=resp.email)
         db.session.add(user)
@@ -126,4 +132,3 @@ def not_found_error(error):
 def internal_error(error):
      db.session.rollback()
      return render_template('500.html'), 500
-

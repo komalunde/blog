@@ -1,5 +1,14 @@
-from hashlib import md5
 from app import db
+from sqlalchemy.sql.schema import PrimaryKeyConstraint
+
+
+class Followers(db.Model):
+    __tablename__='followers'
+    __table_args__ = (
+        PrimaryKeyConstraint('follower_id', 'followed_id'),
+    )
+    follower_id = db.Column('follower_id',db.Integer, db.ForeignKey('users.id'))
+    followed_id = db.Column('followed_id',db.Integer, db.ForeignKey('users.id'))
 
 
 class User(db.Model):
@@ -14,6 +23,13 @@ class User(db.Model):
     last_seen = db.Column(db.DateTime)
 
     posts = db.relationship('Post', backref='users', cascade="all, delete-orphan", lazy='dynamic')
+
+    followed = db.relationship('User',
+                               secondary=Followers.__table__,
+                               primaryjoin=(Followers.follower_id == id),
+                               secondaryjoin=(Followers.followed_id == id),
+                               backref=db.backref('followers', lazy='dynamic'),
+                               lazy='dynamic')
 
     def avatar(self, size):
         return 'https://pickaface.net/assets/images/slides/slide4.png'
@@ -54,6 +70,26 @@ class User(db.Model):
              break
             version += 1
             return new_nickname
+
+    def follow(self, user):
+        if not self.is_following(user):
+            self.followed.append(user)
+            return self
+
+    def unfollow(self, user):
+        if self.is_following(user):
+            self.followed.remove(user)
+            return self
+
+    def is_following(self,user):
+        return self.followed.filter(Followers.followed_id == user.id)>0
+
+    def followed_posts(self):
+        return Post.query.join(Followers.followed_id == Post.user_id)\
+            .filter(Followers.follower_id ==self.id).order_by\
+            (Post.timestamp.desc())
+        Post.query.join(followers,
+                        (followers.followed_id == Post.user_id))
 
 
 class Post(db.Model):

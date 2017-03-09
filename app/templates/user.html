@@ -11,15 +11,20 @@
                 {% if user.about_me %}<p>{{ user.about_me }}</p>{% endif %}
                 {% if user.last_seen %}
                 <p><i>Last seen on:{{ user.last_seen }}</i></p>{% endif %}
+                <p>{{ user.followers.count() }} followers |
                     {% if user.id == g.user.id %}
-                        <a href="{{ url_for('edit') }}">Edit your Profile</a></p>
-                {% endif %}
+                        <a href="{{ url_for('edit') }}">Edit your Profile</a>
+                    {% elif not g.user.is_following(user) %}
+                        <a href="{{ url_for('follow', nickname=user.nicknmae) }}">Follow</a>
+                    {% else %}
+                        <a href="{{ url_for('unfollow', nickname=user.nickname) }}">Unfollow</a>
+                    {% endif %}
 
 
-            </p>
+                </p>
             </td>
     </tr>
-    </table>
+</table>
     <hr>
     {% for post in posts %}
         {% include 'post.html' %}

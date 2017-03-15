@@ -1,3 +1,4 @@
+from flask_mail import Mail
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -13,6 +14,7 @@ db = SQLAlchemy(app)
 lm = LoginManager()
 lm.init_app(app)
 lm.login_view = 'login'
+mail = Mail(app)
 
 from app import views, models
 

@@ -1,5 +1,13 @@
+# from app import app
+import datetime
 from app import db
 from sqlalchemy.sql.schema import PrimaryKeyConstraint
+import sys
+if sys.version_info >= (3, 0):
+    enable_search = False
+else:
+    enable_search = True
+    import flask_whooshalchemy as whooshalchemy
 
 
 class Followers(db.Model):
@@ -22,7 +30,7 @@ class User(db.Model):
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime)
 
-    posts = db.relationship('Post', backref='users', cascade="all, delete-orphan", lazy='dynamic')
+    posts = db.relationship('Post', backref='users', cascade="all, delete-orphan", lazy='dynamic',uselist=True)
 
     followed = db.relationship('User',
                                secondary=Followers.__table__,
@@ -81,25 +89,26 @@ class User(db.Model):
             self.followed.remove(user)
             return self
 
-    def is_following(self,user):
-        return self.followed.filter(Followers.followed_id == user.id)>0
+    def is_following(self, user):
+        return self.followed.filter(Followers.followed_id == user.id).first() > 0
 
     def followed_posts(self):
-        return Post.query.join(Followers.followed_id == Post.user_id)\
-            .filter(Followers.follower_id ==self.id).order_by\
-            (Post.timestamp.desc())
-        Post.query.join(followers,
-                        (followers.followed_id == Post.user_id))
+        return Post.query.join(Followers, (Followers.followed_id == Post.user_id)).filter(
+            Followers.follower_id == self.id).order_by(Post.timestamp.desc()).all()
 
 
 class Post(db.Model):
     __tablename__ = 'posts'
+    __searchable__=['body']
 
     id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     body = db.Column(db.String(140))
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
-    def __init__(self,post):
-        self.post= post
-        return '<Post %r>' % (self.body)
+    def __init__(self, body, user_id):
+        self.body = body
+       # self.post=post
+        self.user_id = user_id
+
+

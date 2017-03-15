@@ -1,0 +1,21 @@
+<!--extends base html-->
+{% extends "base.html" %}
+
+{% block content %}
+        {% for user in userlist %}
+                <h1>User: {{ user.username }}!</h1>
+                {% if g.user.is_following(user) %}
+                    <form action="{{ url_for('unfollow', username=user.username) }}" method="post" name="userlist" onclick="userlist" id="{{ user.id }}">
+                        <input type="submit" value="Unfollow" />
+                    </form>
+                {% elif user.username != g.user.username %}
+                    <form action="{{ url_for('follow', username=user.username) }}" method="post" name="userlist" onclick="userlist" id="{{ user.id }}">
+                        <input type="submit" value="Follow" />
+                    </form>
+                {% else %}
+                    <h3>This is You! :)</h3>
+                {% endif %}
+            </form>
+        {% endfor %}
+{% endblock %}
+

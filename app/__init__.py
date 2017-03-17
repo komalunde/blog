@@ -4,6 +4,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 
+
+from .momentjs import momentjs
 from config import basedir, ADMINS, MAIL_SERVER, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD
 
 app = Flask(__name__)
@@ -15,6 +17,12 @@ lm = LoginManager()
 lm.init_app(app)
 lm.login_view = 'login'
 mail = Mail(app)
+
+app.jinja_env.globals['momentjs'] = momentjs
+
+"""date_unicode = str(list[0][0])
+date = datetime.datetime.strptime(date_unicode, '%Y-%m-%dT%H:%M:%S')
+print date"""
 
 from app import views, models
 

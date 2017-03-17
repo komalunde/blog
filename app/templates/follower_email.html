@@ -3,7 +3,7 @@
     is now a follower.</p>
 <table>
     <tr valign="top">
-        <td><img src="{{ follower.avatar(50) }}"></td>
+        <td><img src="{{ follower.avatar(50) }}" class="img-circle"></td>
         <td>
             <a href="{{ url_for('user', username=follower.username, _external=True) }}">
                 {{ follower.username }}</a><br />

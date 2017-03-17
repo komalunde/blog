@@ -104,7 +104,7 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     body = db.Column(db.String(140))
-    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    timestamp = db.Column(db.String, default=datetime.datetime.utcnow)
 
     def __init__(self, body, user_id):
         self.body = body
